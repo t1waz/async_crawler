@@ -8,7 +8,7 @@ from utils.helpers import register_pipeline
 from tortoise.contrib.starlette import register_tortoise
 
 
-load_dotenv(dotenv_path=Path('..') / '.env')
+load_dotenv(dotenv_path=Path('.') / '.env', verbose=True)
 
 app = Starlette(debug=True, 
                 routes=routes)

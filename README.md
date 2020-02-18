@@ -22,7 +22,7 @@ ENDPOINTS
 	|    endpoint          | methods |       data        | return |
 	+----------------------+---------+-------------------+--------+
 	| /add_link            |   POST  | 'url', 'interval' |   id   |
-	| /get_link_info       |   GET   |                   |        |
+	| /get_link_info       |   GET   |                   |  data  |
 	| /get_link_info/{id}' |   GET   |                   |  data  |
 	+----------------------+---------+-------------------+--------+
 
@@ -110,8 +110,13 @@ Fill .env with data:
 	DB_PASSWORD=<password>
 	DB_NAME=<db_name>
 
+
 Start:
 
 	$ python crawler/main.py
+
+
+Remember to run from main directory, as above ^.
+
 
 Enjoy !
