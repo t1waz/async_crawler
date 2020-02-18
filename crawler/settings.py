@@ -1,17 +1,22 @@
 import os
 
 
-PORT = 9000
-
-RELOAD = True
-
-WORKERS = 10
-
-TASK_SESSION_TIMEOUT = 3
+APP_SETTINGS = {
+    'port': 9000,
+    'reload': True,
+    'workers': 10
+}
 
 MODELS = (
     'links.models',
 )
+
+URL_WORKER_SESSION_TIMEOUT = 30
+
+MAIN_PIPELINE = [
+    'workers.UrlWorker',
+    'workers.LinkDataWorker',
+]
 
 DATABASE_CONFIG = {
     "connections": {

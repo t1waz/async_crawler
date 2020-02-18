@@ -5,7 +5,7 @@ import aiohttp
 from concurrent.futures import ProcessPoolExecutor
 
 
-request_number = 1000
+request_number = 200
 
 url = 'http://127.0.0.1:9000/add_link'
 

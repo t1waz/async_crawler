@@ -1,5 +1,7 @@
 .flake8
 
+.idea
+
 __pycache__/
 
 crawler/links/__pycache__/

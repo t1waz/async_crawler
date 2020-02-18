@@ -1,0 +1,8 @@
+- update readme with more info about how to use:
+    - Serializer
+    - View
+    - Manager
+
+- better exception handling
+
+- add logger

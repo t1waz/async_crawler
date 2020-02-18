@@ -15,7 +15,7 @@ class LinkData(Model):
     id = fields.IntField(pk=True)
     link = fields.ForeignKeyField('models.Link', related_name='datas')
     created = fields.DatetimeField(auto_now_add=True)
-    data = fields.TextField(null=True)
+    data = fields.BinaryField(null=True)
     status_code = fields.IntField(null=True)
 
     def __str__(self):

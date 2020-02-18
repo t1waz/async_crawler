@@ -11,50 +11,33 @@ Project initialy inspired by Django REST.
 
 - new resources should be put inside separate apps.
 - thanks to generic serializators, generic views, and "app architecture" - fast development, and high flexibility should be accomplished.
+- pipeline can be easily extended.
 - it's just a simple demo, source code should evolve with development.
 
 
 ENDPOINTS
 ---------
 
-	+----------------+---------+-------------------+--------+
-	|    endpoint    | methods |       data        | return |
-	+----------------+---------+-------------------+--------+
-	| /add_link      | POST    | 'url', 'interval' | id     |
-	| /get_link_info | POST    | id                | data   |
-	+----------------+---------+-------------------+--------+
+	+----------------------+---------+-------------------+--------+
+	|    endpoint          | methods |       data        | return |
+	+----------------------+---------+-------------------+--------+
+	| /add_link            |   POST  | 'url', 'interval' |   id   |
+	| /get_link_info       |   GET   |                   |        |
+	| /get_link_info/{id}' |   GET   |                   |  data  |
+	+----------------------+---------+-------------------+--------+
 
 
 - /add_link - interval parameter is optional. In future, this parameter will be used to periodically get link data. Return token/id for registered data.
 
-- /get_link_info - id identify url. Return first downloaded data, or short information about status.
+- /get_link_info - return status for all links
 
-SETTINGS
---------
-
-PORT - Bind to a socket with this port.
-
-RELOAD - Enable auto-reload
-
-WORKERS - Set multiple worker processes
-
-TASK_SESSION_TIMEOUT - timeout for task fetching link data
-
-MODELS - include files with models
+- /get_link_info/{id} - return status for link with id(token)
 
 
 OTHER
 -----
 
 server_test.py - simple script to auto generate data. In future simple benchmark for core modules.
-
-
-FUTURE
-======
-
-- adding worker to handle link interval.
-
-- adding async queue. If request number increase, tasks for fetching data need to be deque.
 
 
 INSTALL
@@ -89,7 +72,7 @@ Set database:
 	postgres=# ALTER ROLE <username> SET client_encoding TO 'utf8';
 	postgres=# ALTER ROLE <username> SET default_transaction_isolation TO 'read committed';
 	postgres=# ALTER ROLE <username> SET timezone TO 'UTC';
-	postgres=# GRANT ALL PRIVILEGES ON DATABASE <db_name> TO <username>;
+	postgres=# GRANT ALL PRIVILEGES ON DATABASE <db_name> TO <username>
 
 Quit:
 
