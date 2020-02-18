@@ -14,6 +14,9 @@ Project initialy inspired by Django REST.
 - pipeline can be easily extended.
 - it's just a simple demo, source code should evolve with development.
 
+Notice!
+-------
+exceptions are not properly handled, just for PoC purpose. Logger should be added.
 
 ENDPOINTS
 ---------
