@@ -6,10 +6,10 @@
 GETTING STARTED
 ===============
 
-App main puropose is to show possible solution for building app using Starlette with Tortoise ORM.
+Project main puropose is to show possible solution for building app using Starlette with Tortoise ORM.
 Project initialy inspired by Django REST.
 
-- new resources should be put inside separate apps.
+- new resources should be implemented inside separate apps.
 - thanks to generic serializators, generic views, and "app architecture" - fast development, and high flexibility should be accomplished.
 - pipeline can be easily extended.
 - it's just a simple demo, source code should evolve with development.
