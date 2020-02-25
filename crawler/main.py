@@ -1,7 +1,5 @@
 import settings
 from urls import routes
-from pathlib import Path
-from uvicorn.main import run
 from starlette.applications import Starlette
 from utils.helpers import register_pipeline
 from tortoise.contrib.starlette import register_tortoise
@@ -18,7 +16,3 @@ queue = register_pipeline(app,
                           services=settings.MAIN_PIPELINE)
 
 app.state.queue = queue
-
-
-if __name__ == "__main__":
-    run('main:app', **settings.APP_SETTINGS)

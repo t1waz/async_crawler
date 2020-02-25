@@ -1,16 +1,5 @@
 import os
-from pathlib import Path
-from dotenv import load_dotenv
 
-
-load_dotenv(dotenv_path=Path('.') / '.env', verbose=True)
-
-
-APP_SETTINGS = {
-    'port': 9000,
-    'reload': True,
-    'workers': 10
-}
 
 MODELS = (
     'links.models',
@@ -24,21 +13,23 @@ MAIN_PIPELINE = [
 ]
 
 DATABASE_CONFIG = {
-    "connections": {
-        "default": {
-            "engine": "tortoise.backends.asyncpg",
-            "credentials": {
-                "host": os.getenv("DB_HOST"),
-                "port": os.getenv("DB_PORT"),
-                "user": os.getenv("DB_USER"),
-                "password": os.getenv("DB_PASSWORD"),
-                "database": os.getenv("DB_NAME"),
+    'connections': {
+        'default': {
+            'engine': 'tortoise.backends.asyncpg',
+            'credentials': {
+                'host': os.getenv('POSTGRES_HOST'),
+                'port': os.getenv('POSTGRES_PORT'),
+                'user': os.getenv('POSTGRES_USER'),
+                'password': os.getenv('POSTGRES_PASSWORD'),
+                'database': os.getenv('POSTGRES_DB'),
             }
         },
     },
-    "apps": {
-        "models": {
-            "models": MODELS,
+    'apps': {
+        'models': {
+            'models': MODELS,
         }
     }
 }
+
+

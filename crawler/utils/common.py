@@ -120,10 +120,7 @@ class Manager:
 
     @classmethod
     async def get_list(cls, **kwargs):
-        try:
-            return await cls()._model.filter(**kwargs)
-        except BaseException:
-            return None
+        return await cls()._model.filter(**kwargs)
 
     @classmethod
     async def filter_count(cls, **kwargs):

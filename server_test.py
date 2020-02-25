@@ -7,7 +7,7 @@ from concurrent.futures import ProcessPoolExecutor
 
 request_number = 200
 
-url = 'http://127.0.0.1:9000/add_link'
+url = 'http://0.0.0.0:8080/add_link'
 
 post_data = {
     "url": "https://www.google.pl/",
