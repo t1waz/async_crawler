@@ -3,7 +3,7 @@
 set -o errexit
 set -o nounset
 
-export DATABASE_URL="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
+export DATABASE_URL="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_NAME}"
 
 postgres_ready() {
 python << END
@@ -11,7 +11,7 @@ import sys
 import psycopg2
 try:
     psycopg2.connect(
-        dbname="${POSTGRES_DB}",
+        dbname="${POSTGRES_NAME}",
         user="${POSTGRES_USER}",
         password="${POSTGRES_PASSWORD}",
         host="${POSTGRES_HOST}",

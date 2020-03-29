@@ -21,7 +21,7 @@ DATABASE_CONFIG = {
                 'port': os.getenv('POSTGRES_PORT'),
                 'user': os.getenv('POSTGRES_USER'),
                 'password': os.getenv('POSTGRES_PASSWORD'),
-                'database': os.getenv('POSTGRES_DB'),
+                'database': os.getenv('POSTGRES_NAME'),
             }
         },
     },
