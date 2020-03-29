@@ -1,7 +1,7 @@
 import asyncio
 import aiohttp
 import settings as settings
-from links.managers import LinkDataManager
+from links.models import LinkData
 
 
 class UrlWorker:
@@ -54,12 +54,12 @@ class LinkDataWorker:
     async def save_link_data(self):
         link_data = await self.input_queue.get()
         if link_data:
-            instances = [await LinkDataManager.instance(**link_data)]
+            instances = [await LinkData(**link_data)]
             while self.input_queue.qsize():
                 link_data = await self.input_queue.get()
-                instances.append(await LinkDataManager.instance(**link_data))
+                instances.append(await LinkData(**link_data))
 
-            await LinkDataManager.bulk_create(instances)
+            await LinkData.bulk_create(instances)
 
     async def start(self):
         while True:

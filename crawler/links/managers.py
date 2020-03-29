@@ -1,15 +1,13 @@
-from utils.common import Manager
 from links.models import (
     Link,
     LinkData
 )
+from utils.managers import Manager
 
 
 class LinkManager(Manager):
-    class Meta:
-        model = Link
+    model = Link
 
 
 class LinkDataManager(Manager):
-    class Meta:
-        model = LinkData
+    model = LinkData

@@ -1,11 +1,12 @@
-import settings
-from urls import routes
 from starlette.applications import Starlette
-from utils.helpers import register_pipeline
 from tortoise.contrib.starlette import register_tortoise
 
+import settings
+from urls import routes
+from utils.pipelines import register_pipeline
 
-app = Starlette(debug=True, 
+
+app = Starlette(debug=True,
                 routes=routes)
 
 register_tortoise(app,
