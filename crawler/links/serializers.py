@@ -1,12 +1,13 @@
 import validators
 
-from links.models import Link
+from links.managers import LinkManager, LinkDataManager
 from utils.serializers import Serializer
+from utils.fields import ForeignKeyField
 
 
 class LinkSerializer(Serializer):
     class Meta:
-        model = Link
+        manager = LinkManager
         fields = ('id', 'url', 'interval')
 
     async def validate_url(self, data):
@@ -25,3 +26,12 @@ class LinkSerializer(Serializer):
             return False, 'interval lower that 1'
 
         return True, ''
+
+
+class LinkDataSerializer(Serializer):
+    link = ForeignKeyField(slug_field='url', queryset=LinkManager.all, many=False)
+
+    class Meta:
+        manager = LinkDataManager
+        fields = ('id', 'link', 'created')
+        read_only_fields = ('created',)

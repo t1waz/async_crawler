@@ -1,16 +1,16 @@
 class Manager:
     @classmethod
-    def get_queryset(cls):
-        return cls.model.all()
+    async def get_queryset(cls):
+        return await cls.model.all()
 
     @classmethod
-    def all(cls):
-        return cls.get_queryset()
+    async def all(cls):
+        return await cls.get_queryset()
 
     @classmethod
-    def get(cls, **kwargs):
-        return cls.get_queryset().get(**kwargs)
+    async def get(cls, **kwargs):
+        return await cls.get_queryset().get(**kwargs)
 
     @classmethod
-    def filter(cls, **kwargs):
-        return cls.get_queryset().filter(**kwargs)
+    async def filter(cls, **kwargs):
+        return await cls.get_queryset().filter(**kwargs)

@@ -6,6 +6,7 @@ from tortoise import exceptions
 from tortoise.models import Model
 
 from utils.exceptions import ValidationError
+from utils.fields import SerializerField, ForeignKeyField
 
 
 class SerializerMeta(type):
@@ -13,22 +14,45 @@ class SerializerMeta(type):
     def get_variable_from_method_name(method_name='', splitter='', end_rstrip=''):
         return next(iter(method_name.split(splitter)[1:2]), '').rstrip(end_rstrip)
 
+    def validate_meta(cls, meta, instance, attrs):
+        assert meta is not None, f'{instance.__name__} missing Meta'
+        assert hasattr(meta, 'manager'), f'{instance.__name__} Meta missing model'
+        assert hasattr(meta, 'fields'), f'{instance.__name__} Meta missing fields'
+        assert isinstance(meta.fields, Iterable), f'{instance.__name__} fields must be iterable'
+        assert issubclass(meta.manager.model, Model), \
+            f'{instance.__name__} Meta model not TortToise model instance'
+
+        serialized_fields = [cls.get_variable_from_method_name(attr, 'get_', '_') for attr in
+                             dir(instance) if cls.get_variable_from_method_name(attr, 'get_', '_')
+                             and callable(attr)]
+        allowed_fields = list(meta.manager.model._meta.fields) + serialized_fields
+        assert all(attr in allowed_fields for attr in meta.fields), \
+            f'incorrect Meta field declaration - some fields ' \
+            f'does not belong to model or serialized fields'
+
+        read_only_fields = getattr(meta, 'read_only_fields', None)
+        if read_only_fields:
+            assert all(attr in allowed_fields for attr in read_only_fields), \
+                f'incorrect Meta read_only_field declaration - some fields ' \
+                f'does not belong to model or serialized fields'
+
+        model_fk_fields = meta.manager.model._meta.fk_fields
+        if model_fk_fields:
+            serializer_fk_fields = (name for name, field in attrs.items() if
+                                    isinstance(field, ForeignKeyField))
+            assert serializer_fk_fields, f'{instance.__name__} missing  foreign keys mapping'
+
     def __new__(cls, name, bases, attrs, **kwargs):
         instance = super().__new__(cls, name, bases, attrs, **kwargs)
         if not bases:
             return instance
 
-        _meta = attrs.get('Meta')
-        assert _meta is not None, f'{instance.__name__} missing Meta'
-        assert hasattr(_meta, 'model'), f'{instance.__name__} Meta missing model'
-        assert hasattr(_meta, 'fields'), f'{instance.__name__} Meta missing fields'
-        assert isinstance(_meta.fields, Iterable), f'{instance.__name__} fields must be iterable'
-        assert issubclass(_meta.model, Model), f'{instance.__name__} Meta model not ' \
-                                               f'TortToise model instance'
+        meta = attrs.get('Meta')
+        cls.validate_meta(cls, meta, instance, attrs)
 
-        instance.model = _meta.model
-        instance.model_pk_field_name = instance.model._meta.pk_attr
-        instance.fields = _meta.model._meta.fields
+        instance.manager = meta.manager
+        instance.model_pk_field_name = instance.manager.model._meta.pk_attr
+
         instance.validators = {cls.get_variable_from_method_name(name, 'validate_', '_'): attr
                                for name, attr in attrs.items() if
                                name.startswith('validate') and callable(attr)}
@@ -36,55 +60,63 @@ class SerializerMeta(type):
                                        for name, attr in attrs.items() if
                                        cls.get_variable_from_method_name(name, 'get_', '_')
                                        and callable(attr)}
-        instance.fields.update(set(instance.serializer_methods.keys()))
 
-        assert all(attr in instance.fields for attr in _meta.fields), \
-            f'incorrect Meta field declaration - some fields ' \
-            f'does not belong to model or serialized fields'
+        instance.fk_fields = {name: field for name, field in attrs.items() if
+                              issubclass(field.__class__, SerializerField)}
+        instance.fields = tuple(list(meta.manager.model._meta.fields) +
+                                list(instance.serializer_methods.keys()))
+        instance.read_only_fields = getattr(meta, 'read_only_fields', ())
 
         return instance
 
 
 class Serializer(metaclass=SerializerMeta):
     def __init__(self, instance=None, data=None):
-        if instance and not issubclass(instance.__class__, self.model):
+        if instance and not issubclass(instance.__class__, self.manager.model):
             raise ValidationError(f'{self.__class__.__name__} instance not serializer model class')
 
-        self._instance = instance
         self._data = data
+        self._errors = []
+        self._instance = instance
         self._validated_data = None
-        self._errors = None
 
-    def check_input_data(self, data):
-        if self.model_pk_field_name in data.keys():
-            return False
+    def _check_data(self):
+        input_read_only_fields = [f for f in self._data.keys() if f in self.read_only_fields]
+        if any(input_read_only_fields):
+            return False, [f'field {f} is read only' for f in input_read_only_fields]
 
-        data_keys_diff = set(data.keys()).difference(self.fields)
+        if self.model_pk_field_name in self._data.keys():
+            return False, ['primary key in input']
+
+        data_keys_diff = set(self._data.keys()).difference(self.fields)
         data_keys_diff.discard(self.model_pk_field_name)
 
-        return not bool(data_keys_diff)
+        return not bool(data_keys_diff), [f'field {f} missing in input' for f in data_keys_diff]
 
-    async def run_validators(self):
+    async def _run_validators(self):
         tasks = [validator(self, data=self._data) for name, validator in self.validators.items()
                  if name in self._data.keys()]
 
         return await asyncio.gather(*tasks)
 
     async def is_valid(self):
-        if not self.check_input_data(self._data):
-            self._errors = 'invalid input data'
+        if not self._data:
+            raise ValidationError('initial data not provided, cannot call is_valid()')
 
+        data_valid, errors = self._check_data()
+        self._errors = errors
+        if not data_valid:
             return False
 
-        validation_outputs, errors = zip(*await self.run_validators())
-        self._errors = list(filter(None, errors))
+        validation_outputs, errors = zip(*await self._run_validators())
+        self._errors += list(filter(None, errors))
         valid = all(validation_outputs)
         if valid:
             self._validated_data = copy.deepcopy(self._data)
 
         return valid
 
-    async def set_serialized_fields(self):
+    async def _set_serialized_fields(self):
         attribute_names, methods = self.serializer_methods.keys(), self.serializer_methods.values()
         tasks = [method(self, self._instance) for method in methods]
         attributes = await asyncio.gather(*tasks)
@@ -92,18 +124,21 @@ class Serializer(metaclass=SerializerMeta):
             setattr(self._instance, name, value)
 
     async def to_dict(self):
-        await self.set_serialized_fields()
+        if self._data and not self.validated_data:
+            raise ValidationError('first call is_valid')
+
+        await self._set_serialized_fields()
 
         return {attr: str(getattr(self._instance, attr)) for attr in self.fields}
 
     async def save(self, to_dict=False):
         if self._errors:
             raise ValueError('cannot save, data not valid')
-        elif self._validated_data is None:
+        elif self._data and self._validated_data is None:
             raise ValueError('run is_valid first')
 
         try:
-            self._instance = await self.model.create(**self._validated_data)
+            self._instance = await self.manager.create(**self._validated_data)
         except exceptions.IntegrityError:
             self._errors.append('cannot save instance')
 
@@ -132,7 +167,7 @@ class Serializer(metaclass=SerializerMeta):
 
     @property
     def validated_data(self):
-        return self._validated_dat
+        return self._validated_data
 
     @property
     def errors(self):
