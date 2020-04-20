@@ -19,7 +19,7 @@ PyPika==0.35.21
 six==1.14.0
 soupsieve==1.9.5
 starlette==0.13.1
-tortoise-orm==0.15.9
+tortoise-orm==0.15.23
 typing-extensions==3.7.4.1
 uvicorn==0.11.2
 uvloop==0.14.0
