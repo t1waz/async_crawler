@@ -1,14 +1,14 @@
 import validators
 
 from links.managers import LinkManager, LinkDataManager
-from utils.serializers import Serializer
-from utils.fields import ForeignKeyField
+from serializer import Serializer
+from serializer.fields import ForeignKeyField
 
 
 class LinkSerializer(Serializer):
     class Meta:
-        manager = LinkManager
-        fields = ('id', 'url', 'interval')
+        managwer = LinkManager
+        fields = ('id', 'url', 'interval', 'chuj')
 
     async def validate_url(self, data):
         if not validators.url(data.get('url')) is True:
@@ -27,11 +27,16 @@ class LinkSerializer(Serializer):
 
         return True, ''
 
+    async def get_chuj(self, instance):
+        return 'chuj'
+
 
 class LinkDataSerializer(Serializer):
-    link = ForeignKeyField(slug_field='url', queryset=LinkManager.all, many=False)
+    link = ForeignKeyField(slug_field='url',
+                           queryset=LinkDataManager.all,
+                           many=False)
 
     class Meta:
-        manager = LinkDataManager
+        model = LinkDataManager
         fields = ('id', 'link', 'created')
         read_only_fields = ('created',)

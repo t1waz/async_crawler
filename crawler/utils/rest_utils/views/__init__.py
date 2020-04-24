@@ -43,7 +43,6 @@ class View(HTTPEndpoint, metaclass=ViewMeta):
 
     async def post(self, request):
         data = await self.get_request_data(request)
-        print(data, 'asdadasd')
         if not data:
             self.response_data['status_code'] = 400
             self.response_data['content'] = {'detail': 'invalid request for create'}

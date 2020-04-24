@@ -2,7 +2,7 @@ from links.models import (
     Link,
     LinkData
 )
-from utils.managers import Manager
+from manager import Manager
 
 
 class LinkManager(Manager):
