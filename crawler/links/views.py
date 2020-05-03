@@ -1,13 +1,16 @@
-from links.managers import LinkManager, LinkDataManager
+from links.models import Link, LinkData
 from links.serializers import LinkSerializer, LinkDataSerializer
-from utils.views import View
+from tortoise_rest_utils.view import View
 
 
 class LinkView(View):
-    manager = LinkManager
     serializer_class = LinkSerializer
 
+    def get_queryset(self):
+        return Link.all()
 
 class LinkDataView(View):
-    manager = LinkDataManager
     serializer_class = LinkDataSerializer
+
+    def get_queryset(self):
+        return LinkData.all()

@@ -1,13 +1,16 @@
 import validators
 
-from links.managers import LinkManager, LinkDataManager
-from serializer import Serializer
-from serializer.fields import ForeignKeyField
+from tortoise_rest_utils.serializer import Serializer
+from tortoise_rest_utils.serializer.fields import ForeignKeyField
+from links.models import (
+    Link,
+    LinkData,
+)
 
 
 class LinkSerializer(Serializer):
     class Meta:
-        managwer = LinkManager
+        model = Link
         fields = ('id', 'url', 'interval', 'chuj')
 
     async def validate_url(self, data):
@@ -33,10 +36,10 @@ class LinkSerializer(Serializer):
 
 class LinkDataSerializer(Serializer):
     link = ForeignKeyField(slug_field='url',
-                           queryset=LinkDataManager.all,
+                           queryset=lambda: Link.all(),
                            many=False)
 
     class Meta:
-        model = LinkDataManager
+        model = LinkData
         fields = ('id', 'link', 'created')
         read_only_fields = ('created',)

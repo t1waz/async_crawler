@@ -12,6 +12,7 @@ COPY ./compose/backend/entrypoint.sh /entrypoint
 RUN chmod +x /entrypoint/entrypoint.sh
 
 RUN pip install --upgrade pip \
+    && pip install -i https://test.pypi.org/simple/ tortoise-rest-utils \
 	&& pip install -r /app/requirements.txt
 
 ENTRYPOINT ["/entrypoint/entrypoint.sh"]
